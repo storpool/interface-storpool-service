@@ -1,16 +1,13 @@
 import json
-import time
 
 from charms import reactive
 
 from spcharms import service_hook
+from spcharms import utils as sputils
 
 
 def rdebug(s):
-    """FIXME: use the utils one!"""
-    with open('/tmp/storpool-charms.log', 'a') as f:
-        print('{tm} [storpool-service-provides] {s}'
-              .format(tm=time.ctime(), s=s), file=f)
+    sputils.rdebug(s, prefix='storpool-service')
 
 
 class StorPoolServicePeer(reactive.RelationBase):
