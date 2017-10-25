@@ -5,9 +5,11 @@ from charms import reactive
 
 from spcharms import service_hook
 
+
 def rdebug(s):
     with open('/tmp/storpool-charms.log', 'a') as f:
         print('{tm} [storpool-service-provides] {s}'.format(tm=time.ctime(), s=s), file=f)
+
 
 class StorPoolServicePeer(reactive.RelationBase):
     scope = reactive.scopes.UNIT
