@@ -7,8 +7,10 @@ from spcharms import service_hook
 
 
 def rdebug(s):
+    """FIXME: use the utils one!"""
     with open('/tmp/storpool-charms.log', 'a') as f:
-        print('{tm} [storpool-service-provides] {s}'.format(tm=time.ctime(), s=s), file=f)
+        print('{tm} [storpool-service-provides] {s}'
+              .format(tm=time.ctime(), s=s), file=f)
 
 
 class StorPoolServicePeer(reactive.RelationBase):
@@ -23,25 +25,34 @@ class StorPoolServicePeer(reactive.RelationBase):
             if data is None:
                 rdebug('- no service data yet, sending ours then')
                 (state, _) = service_hook.get_state()
-                rdebug('- just making sure we have "-local" in the state array: {have}'.format(have='-local' in state))
-                conv.set_remote('storpool_service', json.dumps(state['-local']))
+                rdebug('- just making sure we have "-local" in '
+                       'the state array: {have}'
+                       .format(have='-local' in state))
+                conv.set_remote('storpool_service',
+                                json.dumps(state['-local']))
                 rdebug('- done with this hook, it seems')
                 return
             data = json.loads(data)
             if not isinstance(data, dict):
-                rdebug('- hmmm, deserialized the service data, but not a dictionary - "{t}" instead'.format(t=type(data).__name__))
+                rdebug('- hmmm, deserialized the service data, but not '
+                       'a dictionary - "{t}" instead'
+                       .format(t=type(data).__name__))
                 return
 
-            rdebug('- we got some data from the other side: {data}'.format(data=data))
+            rdebug('- we got some data from the other side: {data}'
+                   .format(data=data))
             changed = service_hook.handle(self, True, data, rdebug=rdebug)
             if changed:
-                rdebug('- looks like something changed when we received the data, sending ours across')
+                rdebug('- looks like something changed when we received '
+                       'the data, sending ours across')
                 (state, _) = service_hook.get_state()
                 rdebug('- got full state: {state}'.format(state=state))
-                conv.set_remote('storpool_service', json.dumps(state['-local']))
+                conv.set_remote('storpool_service',
+                                json.dumps(state['-local']))
                 rdebug('- looks fine')
         except Exception as e:
-            rdebug('could not complete the relation joined/changed actions: {e}'.format(e=e))
+            rdebug('could not complete the relation '
+                   'joined/changed actions: {e}'.format(e=e))
 
     @reactive.hook('{peers:storpool-service}-relation-departed')
     def peer_departed(self):
@@ -49,4 +60,5 @@ class StorPoolServicePeer(reactive.RelationBase):
         try:
             service_hook.handle(self, False, None, rdebug=rdebug)
         except Exception as e:
-            rdebug('could not complete the relation departed actions: {e}'.format(e=e))
+            rdebug('could not complete the relation departed actions: {e}'
+                   .format(e=e))
