@@ -28,7 +28,7 @@ import peers as testee
 
 class TestStorPoolService(testtools.TestCase):
     """
-    Test the data exchanged by the storpool-presence interface.
+    Test the data exchanged by the storpool-service interface.
     """
 
     def record_handled(self, *args):
