@@ -6,7 +6,7 @@ A set of unit tests for the storpool-service interface.
 
 import os
 import sys
-import testtools
+import unittest
 
 import json
 import mock
@@ -26,7 +26,7 @@ from spcharms import service_hook
 import peers as testee
 
 
-class TestStorPoolService(testtools.TestCase):
+class TestStorPoolService(unittest.TestCase):
     """
     Test the data exchanged by the storpool-service interface.
     """
