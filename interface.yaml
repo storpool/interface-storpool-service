@@ -1,3 +1,4 @@
 name: storpool-service
 description: Inform StorPool service peers of our readiness.
+ignore: ['unit_tests']
 exclude: ['unit_tests']
