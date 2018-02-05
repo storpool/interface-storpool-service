@@ -37,19 +37,6 @@ class TestStorPoolService(unittest.TestCase):
         """
         self.handled.append(args)
 
-    def test_peer_departed(self):
-        """
-        Test that the provider interface sets a reactive state.
-        """
-        obj = testee.StorPoolServicePeer('here-we-are:17')
-
-        service_hook.clear_data()
-        obj.peer_departed()
-        self.assertEquals([(obj, False, None, testee.rdebug)],
-                          service_hook.get_data())
-
-        # That's all, folks!
-
     @mock.patch('peers.StorPoolServicePeer.set_state')
     @mock.patch('peers.StorPoolServicePeer.conversation')
     def test_peer_changed(self, req_conv, set_state):
@@ -69,7 +56,6 @@ class TestStorPoolService(unittest.TestCase):
         obj = testee.StorPoolServicePeer('here-we-are:18')
 
         # No remote data the first time, we send our own.
-        # (make sure we include a "-local" key there...)
         self.remote_state = []
         conv.get_remote.return_value = None
         obj.peer_changed()
@@ -83,7 +69,7 @@ class TestStorPoolService(unittest.TestCase):
         service_hook.clear_data()
         service_hook.set_changed(False)
         obj.peer_changed()
-        self.assertEquals([(obj, True, {'no': 'matter'}, testee.rdebug)],
+        self.assertEquals([({'no': 'matter'}, testee.rdebug)],
                           service_hook.get_data())
         self.assertEquals([], self.remote_state)
 
@@ -93,6 +79,6 @@ class TestStorPoolService(unittest.TestCase):
         service_hook.clear_data()
         service_hook.set_changed(True)
         obj.peer_changed()
-        self.assertEquals([(obj, True, {'1': 2}, testee.rdebug)],
+        self.assertEquals([({'1': 2}, testee.rdebug)],
                           service_hook.get_data())
         self.assertEquals([('storpool_service', '"me!"')], self.remote_state)

@@ -16,11 +16,11 @@ class SPServiceHook(object):
         self.data = []
         self.changed = False
 
-    def handle(self, obj, attaching, data, rdebug):
+    def handle(self, data, rdebug):
         """
         Record the arguments passed to the method.
         """
-        self.data.append((obj, attaching, data, rdebug))
+        self.data.append((data, rdebug))
         return self.changed
 
     def get_data(self):
@@ -39,7 +39,7 @@ class SPServiceHook(object):
         """
         Mock the service_hook's object state dictionary and its "changed" flag.
         """
-        return ({'-local': 'me!'}, self.changed)
+        return ('me!', self.changed)
 
     def set_changed(self, changed):
         """
