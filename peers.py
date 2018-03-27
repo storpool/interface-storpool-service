@@ -2,8 +2,6 @@
 A Juju charm interface that helps the `storpool-block` charm keep track of
 which units have been installed and configured.
 """
-import json
-
 from charms import reactive
 
 from spcharms import service_hook
