@@ -8,10 +8,7 @@ import os
 import sys
 import unittest
 
-import json
 import mock
-
-from charms import reactive
 
 root_path = os.path.realpath('.')
 if root_path not in sys.path:
@@ -22,6 +19,8 @@ if lib_path not in sys.path:
     sys.path.insert(0, lib_path)
 
 from spcharms import service_hook
+from spcharms import utils as sputils
+
 
 import peers as testee
 
@@ -31,68 +30,42 @@ class TestStorPoolService(unittest.TestCase):
     Test the data exchanged by the storpool-service interface.
     """
 
-    def record_handled(self, *args):
+    def get_call_count(self, obj):
         """
-        Record a single invocation of service_hook.handled().
+        Fetch the current call count of the tools used.
         """
-        self.handled.append(args)
+        return {
+            'rdebug': sputils.rdebug.call_count,
+            'handle': service_hook.handle_remote_presence.call_count,
+            'remove': obj.remove_state.call_count,
+        }
 
-    def test_peer_departed(self):
+    def check_update_call_count(self, obj, ref, delta):
         """
-        Test that the provider interface sets a reactive state.
+        Fetch the current call count and check that the delta is
+        the same as the expected one.
         """
-        obj = testee.StorPoolServicePeer('here-we-are:17')
+        current = self.get_call_count(obj)
+        for (k, v) in delta.items():
+            ref[k] += v
+        self.assertEqual(current, ref)
 
-        service_hook.clear_data()
-        obj.peer_departed()
-        self.assertEquals([(obj, False, None, testee.rdebug)],
-                          service_hook.get_data())
-
-        # That's all, folks!
-
-    @mock.patch('peers.StorPoolServicePeer.set_state')
-    @mock.patch('peers.StorPoolServicePeer.conversation')
-    def test_peer_changed(self, req_conv, set_state):
+    def test_service(self):
         """
-        Test that the requires interface tries to exchange data.
+        Test the data exchanged by the provides interface.
         """
-        def set_remote_state(name, value):
-            """
-            Record all the invocations of conv.set_state() by the charm.
-            """
-            self.remote_state.append((name, value))
+        obj = testee.StorPoolServicePeer('storpool-service:42')
+        obj.remove_state = mock.Mock()
+        call_c = self.get_call_count(obj)
 
-        conv = mock.MagicMock(spec=reactive.relations.Conversation)
-        conv.set_remote.side_effect = set_remote_state
-        req_conv.return_value = conv
-
-        obj = testee.StorPoolServicePeer('here-we-are:18')
-
-        # No remote data the first time, we send our own.
-        # (make sure we include a "-local" key there...)
-        self.remote_state = []
-        conv.get_remote.return_value = None
         obj.peer_changed()
-        self.assertEquals([], service_hook.get_data())
-        self.assertEquals([('storpool_service', '"me!"')], self.remote_state)
+        self.check_update_call_count(obj, call_c, {
+            'rdebug': 1,
+            'handle': 1,
+        })
 
-        # Okay then, let's send some data from the other side...
-        # ...but with no change, so no data sent back out.
-        self.remote_state = []
-        conv.get_remote.return_value = json.dumps({'no': 'matter'})
-        service_hook.clear_data()
-        service_hook.set_changed(False)
-        obj.peer_changed()
-        self.assertEquals([(obj, True, {'no': 'matter'}, testee.rdebug)],
-                          service_hook.get_data())
-        self.assertEquals([], self.remote_state)
-
-        # Right, so let's send some data back out now.
-        self.remote_state = []
-        conv.get_remote.return_value = json.dumps({'1': 2})
-        service_hook.clear_data()
-        service_hook.set_changed(True)
-        obj.peer_changed()
-        self.assertEquals([(obj, True, {'1': 2}, testee.rdebug)],
-                          service_hook.get_data())
-        self.assertEquals([('storpool_service', '"me!"')], self.remote_state)
+        obj.peer_gone()
+        self.check_update_call_count(obj, call_c, {
+            'rdebug': 1,
+            'remove': 1,
+        })
