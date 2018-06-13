@@ -21,20 +21,19 @@ class StorPoolServicePeer(reactive.RelationBase):
     """
     scope = reactive.scopes.UNIT
 
-    @reactive.hook('{peers:storpool-service}-relation-{joined,changed}')
+    @reactive.hook('{peers:storpool-service}-relation-joined')
+    def peer_joined(self):
+        """
+        Let the main charm handle data received from the other units.
+        """
+        rdebug('relation-joined invoked')
+        self.set_state('{relation_name}.notify')
+        self.set_state('{relation_name}.notify-joined')
+
+    @reactive.hook('{peers:storpool-service}-relation-{changed,departed,broken}')
     def peer_changed(self):
         """
         Let the main charm handle data received from the other units.
         """
-        rdebug('relation-joined/changed invoked')
-        self.set_state('{relation_name}.present')
+        rdebug('relation-changed/departed/broken invoked')
         self.set_state('{relation_name}.notify')
-
-    @reactive.hook('{peers:storpool-service}-relation-{departed,broken}')
-    def peer_gone(self):
-        """
-        Let the main charm know that our peers have left the building.
-        """
-        rdebug('relation-departed/broken invoked')
-        self.remove_state('{relation_name}.present')
-        self.remove_state('{relation_name}.notify')

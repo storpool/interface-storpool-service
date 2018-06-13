@@ -58,14 +58,14 @@ class TestStorPoolService(unittest.TestCase):
         obj.remove_state = mock.Mock()
         call_c = self.get_call_count(obj)
 
-        obj.peer_changed()
+        obj.peer_joined()
         self.check_update_call_count(obj, call_c, {
             'rdebug': 1,
             'set': 2,
         })
 
-        obj.peer_gone()
+        obj.peer_changed()
         self.check_update_call_count(obj, call_c, {
             'rdebug': 1,
-            'remove': 2,
+            'set': 1,
         })
