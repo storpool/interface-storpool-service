@@ -30,7 +30,8 @@ class StorPoolServicePeer(reactive.RelationBase):
         self.set_state('{relation_name}.notify')
         self.set_state('{relation_name}.notify-joined')
 
-    @reactive.hook('{peers:storpool-service}-relation-{changed,departed,broken}')
+    @reactive.hook(
+        '{peers:storpool-service}-relation-{changed,departed,broken}')
     def peer_changed(self):
         """
         Let the main charm handle data received from the other units.
